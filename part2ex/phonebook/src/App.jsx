@@ -1,18 +1,20 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Filter from "./components/Filter";
 import PersonForm from "./components/PersonForm";
 import Persons from "./components/Persons";
+import phonebookService from "./services/phonebook";
 
 const App = () => {
-  const [persons, setPersons] = useState([
-    { name: "Arto Hellas", number: "040-123456", id: 1 },
-    { name: "Ada Lovelace", number: "39-44-5323523", id: 2 },
-    { name: "Dan Abramov", number: "12-43-234345", id: 3 },
-    { name: "Mary Poppendieck", number: "39-23-6423122", id: 4 },
-  ]);
+  const [persons, setPersons] = useState([]);
   const [newName, setNewName] = useState("");
   const [newNumber, setNewNumber] = useState("");
   const [filterText, setFilterText] = useState("");
+
+  useEffect(() => {
+    phonebookService.getAll().then((res) => {
+      setPersons(res.data);
+    });
+  }, []);
 
   const handleNewNameChange = (e) => {
     setNewName(e.target.value);
@@ -34,19 +36,44 @@ const App = () => {
     );
 
     if (existing) {
-      alert(`${newObject.name} is already added to the phonebook!`);
+      let confirm = window.confirm(
+        `${newObject.name} is already added to the phonebook, replace the old number with new one?`
+      );
+
+      if (confirm) {
+        phonebookService.update(existing.id, newObject).then((res) => {
+          const personIdx = persons.findIndex(
+            (person) => person.id === existing.id
+          );
+          const updatedPersons = [...persons];
+          updatedPersons[personIdx] = res.data;
+          setPersons(updatedPersons);
+        });
+        setNewName("");
+        setNewNumber("");
+      }
       return;
     }
 
-    let updatedPersons = persons.concat(newObject);
+    phonebookService.create(newObject).then((res) => {
+      let updatedPersons = persons.concat(res.data);
 
-    setPersons(updatedPersons);
+      setPersons(updatedPersons);
+    });
+
     setNewName("");
     setNewNumber("");
   };
 
   const handleFilterTextChange = (e) => {
     setFilterText(e.target.value);
+  };
+
+  const handleDelete = (id) => {
+    const newPersons = persons.filter((person) => person.id !== id);
+    phonebookService.deleteItem(id).then(() => {
+      setPersons(newPersons);
+    });
   };
 
   return (
@@ -62,7 +89,11 @@ const App = () => {
         number={newNumber}
       />
       <h2>Numbers</h2>
-      <Persons persons={persons} filterText={filterText} />
+      <Persons
+        persons={persons}
+        filterText={filterText}
+        onDelete={handleDelete}
+      />
     </div>
   );
 };

@@ -1,4 +1,12 @@
-const Persons = ({ persons, filterText }) => {
+const Persons = ({ persons, filterText, onDelete }) => {
+  const confirmDeletion = (id, name) => {
+    let confirm = window.confirm(`delete ${name}?`);
+
+    if (confirm) {
+      onDelete(id);
+    }
+  };
+
   return persons
     .filter(
       (person) =>
@@ -6,8 +14,11 @@ const Persons = ({ persons, filterText }) => {
     )
     .map((person) => (
       <div key={person.name}>
-        <p key={person.name}>
-          {person.name} {person.number}
+        <p>
+          {person.name} {person.number}{" "}
+          <button onClick={() => confirmDeletion(person.id, person.name)}>
+            delete
+          </button>
         </p>
       </div>
     ));
