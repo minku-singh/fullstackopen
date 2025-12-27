@@ -1,11 +1,14 @@
 import { useState, useEffect } from "react";
 import Note from "./components/Note";
 import noteService from "./services/notes";
+import Notification from "./components/Notification";
+import Footer from "./components/Footer";
 
 const App = () => {
-  const [notes, setNotes] = useState([]);
+  const [notes, setNotes] = useState(null);
   const [newNote, setNewNote] = useState("");
   const [showAll, setShowAll] = useState(true);
+  const [errorMessage, setErrorMessage] = useState("some error happened...");
 
   useEffect(() => {
     noteService.getAll().then((res) => {
@@ -47,10 +50,19 @@ const App = () => {
         setNotes(updatedNotes);
       })
       .catch((error) => {
-        alert(`the note '${note.content}' was already deleted from server`);
+        setErrorMessage(
+          `Note '${note.content}' was already removed from server`
+        );
+        setTimeout(() => {
+          setErrorMessage(null);
+        }, 5000);
         setNotes(notes.filter((n) => n.id !== id));
       });
   };
+
+  if (!notes) {
+    return;
+  }
 
   const notesToShow = showAll
     ? notes
@@ -59,6 +71,7 @@ const App = () => {
   return (
     <div>
       <h1>Notes</h1>
+      <Notification message={errorMessage} />
       <div>
         <button onClick={() => setShowAll(!showAll)}>
           show {showAll ? "important" : "all"}
@@ -77,6 +90,7 @@ const App = () => {
         <input onChange={handleNoteChange} type="text" value={newNote} />
         <button type="submit">save</button>
       </form>
+      <Footer />
     </div>
   );
 };

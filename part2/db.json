@@ -8,7 +8,7 @@
     {
       "id": "2",
       "content": "Browser can execute only JavaScript",
-      "important": true
+      "important": false
     },
     {
       "id": "3",
@@ -19,12 +19,12 @@
       "id": "fcc6"
     },
     {
-      "id": 5,
+      "id": "5",
       "content": "min",
       "important": false
     },
     {
-      "id": 6,
+      "id": "6",
       "content": "singh",
       "important": false
     },
