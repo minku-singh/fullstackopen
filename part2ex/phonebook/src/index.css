@@ -1,6 +1,15 @@
-.notification{
+.success-notification{
   width: 90vw;
   padding: 10px;
   margin: 2vh;
   border: 2px solid green;
+  background-color: aquamarine;
+}
+
+.error-notification{
+  width: 90vw;
+  padding: 10px;
+  margin: 2vh;
+  border: 2px solid red;
+  background-color: rgb(245, 175, 175);
 }

@@ -10,7 +10,10 @@ const App = () => {
   const [newName, setNewName] = useState("");
   const [newNumber, setNewNumber] = useState("");
   const [filterText, setFilterText] = useState("");
-  const [successMsg, setSuccessMsg] = useState("");
+  const [notification, setNotification] = useState({
+    msg: "",
+    type: null,
+  });
 
   useEffect(() => {
     phonebookService.getAll().then((res) => {
@@ -43,35 +46,54 @@ const App = () => {
       );
 
       if (confirm) {
-        phonebookService.update(existing.id, newObject).then((res) => {
-          const personIdx = persons.findIndex(
-            (person) => person.id === existing.id
-          );
-          const updatedPersons = [...persons];
-          updatedPersons[personIdx] = res.data;
-          setPersons(updatedPersons);
+        phonebookService
+          .update(existing.id, newObject)
+          .then((res) => {
+            const personIdx = persons.findIndex(
+              (person) => person.id === existing.id
+            );
+            const updatedPersons = [...persons];
+            updatedPersons[personIdx] = res.data;
+            setPersons(updatedPersons);
 
-          setSuccessMsg(`Updated ${res.data.name}`);
+            setNotification({
+              msg: `Updated ${res.data.name}`,
+              type: "success",
+            });
 
-          setTimeout(() => {
-            setSuccessMsg("");
-          }, 2000);
-        });
+            setTimeout(() => {
+              setNotification(null);
+            }, 2000);
+          })
+          .catch((error) => {
+            setNotification({ msg: error.response.data.error, type: "error" });
+            setTimeout(() => {
+              setNotification(null);
+            }, 2000);
+          });
         setNewName("");
         setNewNumber("");
       }
       return;
     }
 
-    phonebookService.create(newObject).then((res) => {
-      let updatedPersons = persons.concat(res.data);
-      setPersons(updatedPersons);
-      setSuccessMsg(`Added ${res.data.name}`);
+    phonebookService
+      .create(newObject)
+      .then((res) => {
+        let updatedPersons = persons.concat(res.data);
+        setPersons(updatedPersons);
+        setNotification({ msg: `Added ${res.data.name}`, type: "success" });
 
-      setTimeout(() => {
-        setSuccessMsg("");
-      }, 2000);
-    });
+        setTimeout(() => {
+          setNotification(null);
+        }, 2000);
+      })
+      .catch((error) => {
+        setNotification({ msg: error.response.data.error, type: "error" });
+        setTimeout(() => {
+          setNotification(null);
+        }, 2000);
+      });
 
     setNewName("");
     setNewNumber("");
@@ -91,7 +113,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
-      <Notification msg={successMsg} />
+      <Notification notification={notification} />
       <Filter text={filterText} onChange={handleFilterTextChange} />
       <h2>Add a new</h2>
       <PersonForm
